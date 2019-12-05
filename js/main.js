@@ -7,11 +7,23 @@ let car = [];
 let frogX = 250;
 let frogY = 450;
 let win = 0;
+let carSpeed = 20;
 
 function init() { //purpose: push image into array and use it by calling the array with an index.
   frog.src = "img/frog.png";
-  car.push()
+  createCar("img/blueCar", -200, 100);
+  createCar("img/greenCar", -200, 150);
+  createCar("img/yellowCar", 500, 350);
+
   drawBackground();
+}
+
+function createCar(src, x, y){
+  car.push(new Image());
+  let index = car.length - 1;
+  car[index].src = src.toString();
+  car[index].left = x;
+  car[index].top = y;
 }
 
 function start() {
@@ -31,6 +43,7 @@ function stop() {
   button.setAttribute("onclick", "start()");
 
   cancelAnimationFrame(a);
+  drawBackground();
 }
 
 function animate() {//animations will run at fps of computer
@@ -46,13 +59,13 @@ $(document).keydown(function(event){
       frogX-=49;
     break;
     case 38:
-      frogY-=34;
+      frogY-=50;
     break;
     case 39:
       frogX+=49;
     break;
     case 40:
-      frogY+=34;
+      frogY+=50;
     break;
   }
   if (frogY <= 50){
@@ -66,13 +79,26 @@ function drawBackground() {
   ctx.fillRect(0, 0, 500, 500);
   //draw roads
   ctx.fillStyle = "black";
-  for (let i = 100; i < 400; i += 50) {
+  for (let i = 100; i < 200; i += 50) {
     ctx.fillRect(0, i, 500, 49);
   }
+  for (let i = 300; i < 400; i += 50) {
+    ctx.fillRect(0, i, 500, 49);
+  }
+  ctx.fillStyle = "yellow";
+  ctx.fillRect(0, 149, 500, 2);
+  ctx.fillRect(0, 349, 500, 2);
 }
 
 function drawImages() {
-  ctx.drawImage(frog, frogX - frog.width / 2, frogY - frog.height / 2);
+  ctx.drawImage(frog, frogX - frog.width / 2, frogY + 8);
+  for (let i = 0; i < car.length; i++){
+    car[i].left += carSpeed;
+    ctx.drawImage(car[i], car[i].left, car[i].top);
+    if(car[i].left > 500){
+      car[i].left= ‐200;
+    }
+  }
 }
 
-window.onload = function() {init()};
+$(window).on("load", function() {init()});
