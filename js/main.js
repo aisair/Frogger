@@ -7,23 +7,33 @@ let car = [];
 let frogX = 250;
 let frogY = 450;
 let win = 0;
-let carSpeed = 20;
+let carSpeed = 10;
+let run = false;
 
 function init() { //purpose: push image into array and use it by calling the array with an index.
   frog.src = "img/frog.png";
-  createCar("img/blueCar", -200, 100);
-  createCar("img/greenCar", -200, 150);
-  createCar("img/yellowCar", 500, 350);
+  createCar("img/blueCar.png", "blueCar", -200, 100);
+  createCar("img/greenCar.png", "greenCar", -200, 150);
+  createCar("img/yellowCar.png", "yellowCar", , 350);
 
   drawBackground();
 }
 
-function createCar(src, x, y){
-  car.push(new Image());
-  let index = car.length - 1;
-  car[index].src = src.toString();
-  car[index].left = x;
-  car[index].top = y;
+function createCar(src, title, x, y, direction){
+  let img = new Image();
+  img.src = src.toString();
+  img.title = title;
+  img.alt = title;
+  img.yCoord = y;
+  if (direction.toLowerCase() === "l"){
+    img.left = true;
+    img.xCoord = 500;
+  }
+  else{
+    img.left = false;
+    img.xCoord = -200;
+  }
+  car.push(img);
 }
 
 function start() {
@@ -32,8 +42,8 @@ function start() {
   let image = document.getElementById("toggleImage");
   image.setAttribute("src", "img/pause.png");
   button.setAttribute("onclick", "stop()");
-
   a = window.requestAnimationFrame(animate);
+  run = true;
 }
 
 function stop() {
@@ -41,37 +51,19 @@ function stop() {
   let image = document.getElementById("toggleImage");
   image.setAttribute("src", "img/play.png");
   button.setAttribute("onclick", "start()");
-
   cancelAnimationFrame(a);
+  run = false;
   drawBackground();
 }
 
 function animate() {//animations will run at fps of computer
   drawBackground();
   drawImages();
-
-  a = window.requestAnimationFrame(animate);
-}
-
-$(document).keydown(function(event){
-  switch (event.keyCode ? event.keyCode : event.which){
-    case 37:
-      frogX-=49;
-    break;
-    case 38:
-      frogY-=50;
-    break;
-    case 39:
-      frogX+=49;
-    break;
-    case 40:
-      frogY+=50;
-    break;
-  }
   if (frogY <= 50){
     win = 1;
   }
-});
+  a = window.requestAnimationFrame(animate);
+}
 
 function drawBackground() {
   //draw grass
@@ -90,13 +82,30 @@ function drawBackground() {
   ctx.fillRect(0, 349, 500, 2);
 }
 
+$(window).keydown(function(event){
+  switch (event.key){
+    case "ArrowLeft":
+      frogX-=49;
+      break;
+    case "ArrowUp":
+      frogY-=50;
+      break;
+    case "ArrowRight":
+      frogX+=49;
+      break;
+    case "ArrowDown":
+      frogY+=50;
+      break;
+  }
+});
+
 function drawImages() {
   ctx.drawImage(frog, frogX - frog.width / 2, frogY + 8);
   for (let i = 0; i < car.length; i++){
-    car[i].left += carSpeed;
-    ctx.drawImage(car[i], car[i].left, car[i].top);
-    if(car[i].left > 500){
-      car[i].left= ‐200;
+    car[i].xCoord += carSpeed;
+    ctx.drawImage(car[i], car[i].xCoord, car[i].yCoord, 75, 45);
+    if(car[i].xCoord > 500){
+      car[i].xCoord = -200;
     }
   }
 }
