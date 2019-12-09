@@ -9,6 +9,7 @@ let frogY = 450;
 let win = 0;
 let carSpeed = 10;
 let run = false;
+let explosionFrame = 0;
 
 function init() { //purpose: push image into array and use it by calling the array with an index.
   frog.src = "img/frog.png";
@@ -59,18 +60,13 @@ function stop() {
   drawBackground();
 }
 
-function animate() {//animations will run at fps of computer
+function animate() {
   drawBackground();
   drawImages();
   if (win === -1) {
     cancelAnimationFrame(a);
+    animateExplosion();
     run = false;
-    if (confirm("You were hit by a car! Continue?") === true){
-      frogX = 250;
-      frogY = 450;
-      win = 0;
-      start();
-    }
   }
   else if (frogY <= 50 && win !== -1){
     win = 1;
@@ -133,6 +129,55 @@ function drawImages() {
       win = -1;
     }
     ctx.drawImage(car[i], car[i].xCoord, car[i].yCoord, 75, 45);
+  }
+}
+
+function animateExplosion() {
+  let sprites = new Image();
+  sprites.src = "img/explosion.png";
+  drawBackground();
+  ctx.drawImage(frog, frogX - frog.width / 2, frogY + 8);
+  for (let i = 0; i < car.length; i++){
+    ctx.drawImage(car[i], car[i].xCoord, car[i].yCoord, 75, 45);
+  }
+  if (explosionFrame < 7){
+    switch (explosionFrame){
+      case 0:
+        ctx.drawImage(sprites, 0, 15, 13, 14, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        break;
+      case 1:
+        ctx.drawImage(sprites, 21, 8, 27, 28, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        break;
+      case 2:
+        ctx.drawImage(sprites, 55, 5, 36, 34, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        break;
+      case 3:
+        ctx.drawImage(sprites, 95, 5, 45, 38, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        break;
+      case 4:
+        ctx.drawImage(sprites, 153, 0, 42, 43, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        break;
+      case 5:
+        ctx.drawImage(sprites, 207, 5, 44, 42, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        break;
+      case 6:
+        ctx.drawImage(sprites, 263, 5, 45, 44, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        break;
+      default:
+        break;
+    }
+    explosionFrame+= 0.5;
+    a = window.requestAnimationFrame(animateExplosion);
+  }
+  else{
+    explosionFrame = 0;
+    cancelAnimationFrame(a);
+    if (confirm("You got hit! Continue?") === true){
+      frogX = 250;
+      frogY = 450;
+      win = 0;
+      start();
+    }
   }
 }
 
