@@ -12,20 +12,20 @@ let run = false;
 
 function init() { //purpose: push image into array and use it by calling the array with an index.
   frog.src = "img/frog.png";
-  createCar("img/blueCar.png", "blueCar", -200, 100);
-  createCar("img/greenCar.png", "greenCar", -200, 150);
-  createCar("img/yellowCar.png", "yellowCar", , 350);
+  createCar("img/blueCar.png", "blueCar", 100, false);
+  createCar("img/greenCar.png", "greenCar", 150, true);
+  createCar("img/yellowCar.png", "yellowCar", 350 , false);
 
   drawBackground();
 }
 
-function createCar(src, title, x, y, direction){
+function createCar(src, title, y, left){
   let img = new Image();
   img.src = src.toString();
   img.title = title;
   img.alt = title;
   img.yCoord = y;
-  if (direction.toLowerCase() === "l"){
+  if (left === true){
     img.left = true;
     img.xCoord = 500;
   }
@@ -43,6 +43,9 @@ function start() {
   image.setAttribute("src", "img/pause.png");
   button.setAttribute("onclick", "stop()");
   a = window.requestAnimationFrame(animate);
+  frogX = 250;
+  frogY = 450;
+  win = 0;
   run = true;
 }
 
@@ -59,10 +62,22 @@ function stop() {
 function animate() {//animations will run at fps of computer
   drawBackground();
   drawImages();
-  if (frogY <= 50){
+  if (win === -1) {
+    cancelAnimationFrame(a);
+    run = false;
+    if (confirm("You were hit by a car! Continue?") === true){
+      frogX = 250;
+      frogY = 450;
+      win = 0;
+      start();
+    }
+  }
+  else if (frogY <= 50 && win !== -1){
     win = 1;
   }
-  a = window.requestAnimationFrame(animate);
+  else{
+    a = window.requestAnimationFrame(animate);
+  }
 }
 
 function drawBackground() {
@@ -102,11 +117,22 @@ $(window).keydown(function(event){
 function drawImages() {
   ctx.drawImage(frog, frogX - frog.width / 2, frogY + 8);
   for (let i = 0; i < car.length; i++){
-    car[i].xCoord += carSpeed;
-    ctx.drawImage(car[i], car[i].xCoord, car[i].yCoord, 75, 45);
-    if(car[i].xCoord > 500){
-      car[i].xCoord = -200;
+    if (car[i].left === true){
+      if(car[i].xCoord < -200){
+        car[i].xCoord = 500;
+      }
+      car[i].xCoord -= carSpeed;
     }
+    else{
+      if(car[i].xCoord > 500){
+        car[i].xCoord = -200;
+      }
+      car[i].xCoord += carSpeed;
+    }
+    if (frogX + frog.width> car[i].xCoord && frogX < car[i].xCoord + 75 && frogY + frog.height > car[i].yCoord && frogY < car[i].yCoord + 45) {
+      win = -1;
+    }
+    ctx.drawImage(car[i], car[i].xCoord, car[i].yCoord, 75, 45);
   }
 }
 
