@@ -1,15 +1,12 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
-let a;
+let a; //animating function identifier
 
 let frog = new Image();
 let car = [];
 let frogX = 250;
 let frogY = 450;
-let win = 0;
 let carSpeed = 10;
-let run = false;
-let explosionFrame = 0;
 
 function init() { //purpose: push image into array and use it by calling the array with an index.
   frog.src = "img/frog.png";
@@ -38,41 +35,60 @@ function createCar(src, title, y, left){
 }
 
 function start() {
-  //change button to stop game
+  //toggle start button to stop button
   let button = document.getElementById("toggle");
   let image = document.getElementById("toggleImage");
   image.setAttribute("src", "img/pause.png");
   button.setAttribute("onclick", "stop()");
-  a = window.requestAnimationFrame(animate);
+  //reset vars for new game
   frogX = 250;
   frogY = 450;
-  win = 0;
-  run = true;
+  //start animation
+  animate();
 }
 
 function stop() {
+  //toggle stop button to start button
   let button = document.getElementById("toggle");
   let image = document.getElementById("toggleImage");
   image.setAttribute("src", "img/play.png");
   button.setAttribute("onclick", "start()");
+  //cancel animation
   cancelAnimationFrame(a);
-  run = false;
+  //draw a clean background so it doesn't look messy
   drawBackground();
 }
 
+$(window).keydown(function(event){ //detect keypress using jQuery and update frog position
+  switch (event.key){
+    case "ArrowLeft":
+      frogX -= 49;
+      break;
+    case "ArrowUp":
+      frogY -= 50;
+      break;
+    case "ArrowRight":
+      frogX += 49;
+      break;
+    case "ArrowDown":
+      frogY += 50;
+      break;
+  }
+});
+
 function animate() {
   drawBackground();
-  drawImages();
-  if (win === -1) {
+  if (drawImages() === true) { //if collision is detected, stop animation and draw explosion
     cancelAnimationFrame(a);
     animateExplosion();
-    run = false;
   }
-  else if (frogY <= 50 && win !== -1){
-    win = 1;
+  else if (frogY < 50){
+      //if frog reaches top, end the game with a win
+      stopGame(true);
   }
   else{
-    a = window.requestAnimationFrame(animate);
+      //run another frame of the animation
+      a = window.requestAnimationFrame(animate);
   }
 }
 
@@ -88,96 +104,94 @@ function drawBackground() {
   for (let i = 300; i < 400; i += 50) {
     ctx.fillRect(0, i, 500, 49);
   }
+  //draw yellow road lines
   ctx.fillStyle = "yellow";
   ctx.fillRect(0, 149, 500, 2);
   ctx.fillRect(0, 349, 500, 2);
 }
 
-$(window).keydown(function(event){
-  switch (event.key){
-    case "ArrowLeft":
-      frogX-=49;
-      break;
-    case "ArrowUp":
-      frogY-=50;
-      break;
-    case "ArrowRight":
-      frogX+=49;
-      break;
-    case "ArrowDown":
-      frogY+=50;
-      break;
-  }
-});
-
 function drawImages() {
+  //draw frog
   ctx.drawImage(frog, frogX - frog.width / 2, frogY + 8);
-  for (let i = 0; i < car.length; i++){
+  //draw cars
+  for (let i = 0; i < car.length ; i++){
+    //move car to other side of screen if it is offscreen
     if (car[i].left === true){
-      if(car[i].xCoord < -200){
+      if (car[i].xCoord < -200){
         car[i].xCoord = 500;
       }
       car[i].xCoord -= carSpeed;
     }
-    else{
-      if(car[i].xCoord > 500){
+    else {
+      if (car[i].xCoord > 500){
         car[i].xCoord = -200;
       }
       car[i].xCoord += carSpeed;
     }
-    if (frogX + frog.width> car[i].xCoord && frogX < car[i].xCoord + 75 && frogY + frog.height > car[i].yCoord && frogY < car[i].yCoord + 45) {
-      win = -1;
-    }
+    //draw the car!
     ctx.drawImage(car[i], car[i].xCoord, car[i].yCoord, 75, 45);
+    //check for collision
+    if (frogX + frog.width> car[i].xCoord && frogX < car[i].xCoord + 75 && frogY + frog.height > car[i].yCoord && frogY < car[i].yCoord + 45) {
+      return true;
+    }
   }
 }
 
 function animateExplosion() {
+  //get the explosion sprite sheet
   let sprites = new Image();
   sprites.src = "img/explosion.png";
+  //drawImage() function but without moving the cars
   drawBackground();
   ctx.drawImage(frog, frogX - frog.width / 2, frogY + 8);
   for (let i = 0; i < car.length; i++){
     ctx.drawImage(car[i], car[i].xCoord, car[i].yCoord, 75, 45);
   }
-  if (explosionFrame < 7){
-    switch (explosionFrame){
+  //draw the explosion. every frame of the explosion animation runs every 2 frames of the browser
+  for (let i = 0; i <= 6; i += 0.5) {
+    switch (i) {
       case 0:
-        ctx.drawImage(sprites, 0, 15, 13, 14, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        ctx.drawImage(sprites, 0, 15, 13, 14, (frogX - 49 / 2), (frogY - 34 / 2), 49, 49);
         break;
       case 1:
-        ctx.drawImage(sprites, 21, 8, 27, 28, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        ctx.drawImage(sprites, 21, 8, 27, 28, (frogX - 49 / 2), (frogY - 34 / 2), 49, 49);
         break;
       case 2:
-        ctx.drawImage(sprites, 55, 5, 36, 34, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        ctx.drawImage(sprites, 55, 5, 36, 34, (frogX - 49 / 2), (frogY - 34 / 2), 49, 49);
         break;
       case 3:
-        ctx.drawImage(sprites, 95, 5, 45, 38, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        ctx.drawImage(sprites, 95, 5, 45, 38, (frogX - 49 / 2), (frogY - 34 / 2), 49, 49);
         break;
       case 4:
-        ctx.drawImage(sprites, 153, 0, 42, 43, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        ctx.drawImage(sprites, 153, 0, 42, 43, (frogX - 49 / 2), (frogY - 34 / 2), 49, 49);
         break;
       case 5:
-        ctx.drawImage(sprites, 207, 5, 44, 42, (frogX - 49/2), (frogY - 34/2), 49, 49);
+        ctx.drawImage(sprites, 207, 5, 44, 42, (frogX - 49 / 2), (frogY - 34 / 2), 49, 49);
         break;
       case 6:
-        ctx.drawImage(sprites, 263, 5, 45, 44, (frogX - 49/2), (frogY - 34/2), 49, 49);
-        break;
-      default:
+        ctx.drawImage(sprites, 263, 5, 45, 44, (frogX - 49 / 2), (frogY - 34 / 2), 49, 49);
         break;
     }
-    explosionFrame+= 0.5;
-    a = window.requestAnimationFrame(animateExplosion);
+  }
+  //reset vars and stop the animation
+  cancelAnimationFrame(a);
+  if (confirm("You got hit! Continue?") === true){ //ask user if they want to restart
+    start();
   }
   else{
-    explosionFrame = 0;
+    stopGame(false);
+  }
+}
+
+function stopGame(win){ //stops the game
+  if (win){
+    //won case
+    alert("You have won the game!")
+  }
+  else{
+    //loss case
     cancelAnimationFrame(a);
-    if (confirm("You got hit! Continue?") === true){
-      frogX = 250;
-      frogY = 450;
-      win = 0;
-      start();
-    }
+    alert("You lost.")
   }
 }
 
