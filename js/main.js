@@ -8,12 +8,14 @@ let frogX = 250;
 let frogY = 450;
 let frogLives = 3;
 let carSpeed = 10;
+let level = 1;
 
 function init() { //purpose: push image into array and use it by calling the array with an index.
   frog.src = "img/frog.png";
   createCar("img/blueCar.png", "blueCar", 100, false);
   createCar("img/greenCar.png", "greenCar", 150, true);
   createCar("img/yellowCar.png", "yellowCar", 350 , false);
+  document.getElementById("level").innerHTML = "0";
 
   drawBackground();
 }
@@ -41,6 +43,8 @@ function start() {
   let image = document.getElementById("toggleImage");
   image.setAttribute("src", "img/pause.png");
   button.setAttribute("onclick", "stop()");
+  //update level element
+  document.getElementById("level").innerHTML = level.toString();
   //reset vars for new game
   frogX = 250;
   frogY = 450;
@@ -99,6 +103,7 @@ function animate() {
   else if (frogY < 50 && carSpeed < 25){
     //if frog reaches top, end the game with a win
     alert("You beat the level! Faster!");
+    level++;
     start();
     carSpeed += 5;
   }
