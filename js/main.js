@@ -12,12 +12,23 @@ let level = 1;
 
 function init() { //purpose: push image into array and use it by calling the array with an index.
   frog.src = "img/frog.png";
-  createCar("img/blueCar.png", "blueCar", 100, false);
-  createCar("img/greenCar.png", "greenCar", 150, true);
+  createCar("img/blueCar.png", "blueCar", 100, true);
+  createCar("img/greenCar.png", "greenCar", 150, false);
   createCar("img/yellowCar.png", "yellowCar", 350 , false);
   document.getElementById("level").innerHTML = "0";
 
   drawBackground();
+}
+
+function reset(){
+  stop();
+  frogX = 250;
+  frogY = 450;
+  frogLives = 3;
+  carSpeed = 10;
+  level = 1;
+  car.pop();
+  start();
 }
 
 function createCar(src, title, y, left){
@@ -45,6 +56,10 @@ function start() {
   button.setAttribute("onclick", "stop()");
   //update level element
   document.getElementById("level").innerHTML = level.toString();
+  //add car if level 3
+  if (level === 3 && car.length < 4){
+    createCar("img/blueCar.png", "blueCar2", 300, true);
+  }
   //reset vars for new game
   frogX = 250;
   frogY = 450;
